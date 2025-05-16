@@ -60,6 +60,7 @@ export default function WorkspaceCreation() {
 
 			// Redirect to the main app after workspace creation
 			router.push("/app")
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (err: any) {
 			console.error("Workspace creation error:", err)
 			if (err.response?.data?.detail) {

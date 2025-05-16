@@ -3,6 +3,7 @@
 import React from 'react'
 import Calendar from '@/components/Calendar/Calendar'
 import Link from 'next/link'
+import WorkspaceInfo from '@/components/Workspace/WorkspaceInfo'
 
 export default function BookingPage() {
 	return (
@@ -11,7 +12,7 @@ export default function BookingPage() {
 				<div className="container mx-auto px-4 flex justify-between items-center">
 					<div className="flex items-center space-x-4">
 						<div className="text-blue-600 font-bold text-2xl">OYAU</div>
-						<div className="text-gray-500">- Название компании</div>
+						<WorkspaceInfo />
 					</div>
 					<div className="flex items-center space-x-4">
 						<div className="text-sm text-gray-500">Подписка действует до 07.04.2024</div>

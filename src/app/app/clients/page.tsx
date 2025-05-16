@@ -1,43 +1,63 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ClientCard, { Client } from '@/components/Client/ClientCard'
 import ClientModal from '@/components/Client/ClientModal'
 import Button from '@/components/UI/Button'
 import Link from 'next/link'
-
-const MOCK_CLIENTS: Client[] = [
-	{
-		id: '1',
-		name: 'Иванова Анна',
-		phoneNumber: '+7 777 777 77 77',
-		category: 'vip',
-		dateOfBirth: '1990-05-15',
-		discount: 10,
-		notes: 'Предпочитает утренние часы. Любит зеленый чай во время процедур.',
-		visits: [
-			{ id: 'v1', date: '2023-12-10', service: 'Маникюр', amount: 2500 },
-			{ id: 'v2', date: '2023-11-25', service: 'Стрижка', amount: 3500 },
-			{ id: 'v3', date: '2023-10-15', service: 'Окрашивание', amount: 5000 },
-		]
-	},
-	{
-		id: '2',
-		name: 'Петров Сергей',
-		phoneNumber: '+7 888 888 88 88',
-		category: 'regular',
-		dateOfBirth: '1985-08-25',
-		visits: [
-			{ id: 'v4', date: '2023-12-05', service: 'Стрижка', amount: 1500 },
-		]
-	}
-]
+import { getClients, createClient, updateClient, deleteClient, apiClientToClient } from '@/lib/client'
+import { enrichClientWithVisitHistory } from '@/lib/clientBookings'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
+import WorkspaceInfo from '@/components/Workspace/WorkspaceInfo'
+import WorkspaceSelector from '@/components/Workspace/WorkspaceSelector'
 
 export default function ClientsPage() {
-	const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS)
+	const [clients, setClients] = useState<Client[]>([])
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [selectedClient, setSelectedClient] = useState<Client | undefined>(undefined)
 	const [searchQuery, setSearchQuery] = useState('')
+	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
+	const { workspaceId } = useWorkspace()
+
+	// Fetch clients when the page loads
+	useEffect(() => {
+		if (workspaceId) {
+			fetchClients()
+		}
+	}, [workspaceId])
+
+	const fetchClients = async () => {
+		setLoading(true)
+		setError(null)
+		try {
+			const apiClients = await getClients()
+
+			// Convert API clients to frontend Client model
+			let frontendClients = apiClients.map(apiClient => {
+				const client = apiClientToClient(apiClient)
+				// Initialize visits as empty array if not available
+				if (!client.visits) {
+					client.visits = []
+				}
+				return client
+			})
+
+			// Enrich clients with visit history
+			const enrichedClients = await Promise.all(
+				frontendClients.map(async (client) => {
+					return await enrichClientWithVisitHistory(client)
+				})
+			)
+
+			setClients(enrichedClients)
+		} catch (err) {
+			console.error('Error fetching clients:', err)
+			setError('Failed to load clients. Please try again.')
+		} finally {
+			setLoading(false)
+		}
+	}
 
 	const handleEditClient = (client: Client) => {
 		setSelectedClient(client)
@@ -49,11 +69,66 @@ export default function ClientsPage() {
 		setIsModalOpen(true)
 	}
 
-	const handleSaveClient = (client: Client) => {
-		if (selectedClient) {
-			setClients(clients.map(c => c.id === client.id ? client : c))
-		} else {
-			setClients([...clients, client])
+	const handleSaveClient = async (client: Client) => {
+		setLoading(true)
+		setError(null)
+
+		try {
+			if (selectedClient) {
+				// Update existing client
+				await updateClient({
+					name: client.name.split(' ')[0] || '',
+					surname: client.name.split(' ').slice(1).join(' ') || '',
+					phone: client.phoneNumber,
+					birth_date: client.dateOfBirth,
+					personal_discount: client.discount,
+					comments: client.notes,
+					category: client.category
+				})
+
+				// Refresh client list
+				await fetchClients()
+			} else {
+				// Create new client
+				await createClient({
+					name: client.name.split(' ')[0] || '',
+					surname: client.name.split(' ').slice(1).join(' ') || '',
+					phone: client.phoneNumber,
+					birth_date: client.dateOfBirth,
+					personal_discount: client.discount,
+					comments: client.notes,
+					category: client.category
+				})
+
+				// Refresh client list
+				await fetchClients()
+			}
+
+			// Close the modal
+			setIsModalOpen(false)
+		} catch (err) {
+			console.error('Error saving client:', err)
+			setError('Failed to save client. Please try again.')
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	const handleDeleteClient = async (clientId: string) => {
+		if (confirm('Вы уверены, что хотите удалить этого клиента?')) {
+			setLoading(true)
+			setError(null)
+
+			try {
+				await deleteClient(parseInt(clientId))
+				await fetchClients()
+				setIsModalOpen(false)
+			} catch (err) {
+				console.error('Error deleting client:', err)
+				setError('Failed to delete client. Please try again.')
+			} finally {
+				setLoading(false)
+			}
 		}
 	}
 
@@ -64,13 +139,34 @@ export default function ClientsPage() {
 		)
 		: clients
 
+	// If there's no workspace selected, show the workspace selector
+	if (!workspaceId) {
+		return (
+			<div className="flex flex-col h-screen">
+				<header className="bg-white shadow-sm border-b border-gray-200 py-4">
+					<div className="container mx-auto px-4 flex justify-between items-center">
+						<div className="flex items-center space-x-4">
+							<div className="text-blue-600 font-bold text-2xl">OYAU</div>
+						</div>
+					</div>
+				</header>
+
+				<main className="flex flex-grow justify-center items-center p-6">
+					<div className="w-full max-w-md">
+						<WorkspaceSelector />
+					</div>
+				</main>
+			</div>
+		)
+	}
+
 	return (
 		<div className="flex flex-col h-screen">
 			<header className="bg-white shadow-sm border-b border-gray-200 py-4">
 				<div className="container mx-auto px-4 flex justify-between items-center">
 					<div className="flex items-center space-x-4">
 						<div className="text-blue-600 font-bold text-2xl">OYAU</div>
-						<div className="text-gray-500">- Название компании</div>
+						<WorkspaceInfo />
 					</div>
 					<div className="flex items-center space-x-4">
 						<div className="text-sm text-gray-500">Подписка действует до 07.04.2024</div>
@@ -231,7 +327,7 @@ export default function ClientsPage() {
 				<div className="flex-grow p-6 overflow-y-auto">
 					<div className="flex justify-between items-center mb-6">
 						<h1 className="text-2xl font-bold">Клиенты</h1>
-						<Button variant="primary" onClick={handleAddClient}>
+						<Button variant="primary" onClick={handleAddClient} disabled={loading}>
 							<span className="flex items-center">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -253,7 +349,17 @@ export default function ClientsPage() {
 						</Button>
 					</div>
 
-					{filteredClients.length > 0 ? (
+					{error && (
+						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+							{error}
+						</div>
+					)}
+
+					{loading && !clients.length ? (
+						<div className="flex justify-center items-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+						</div>
+					) : filteredClients.length > 0 ? (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{filteredClients.map(client => (
 								<ClientCard
@@ -286,7 +392,7 @@ export default function ClientsPage() {
 									: 'У вас пока нет ни одного клиента'}
 							</p>
 							{!searchQuery.trim() && (
-								<Button variant="primary" onClick={handleAddClient}>
+								<Button variant="primary" onClick={handleAddClient} disabled={loading}>
 									Добавить клиента
 								</Button>
 							)}
@@ -300,6 +406,8 @@ export default function ClientsPage() {
 				onClose={() => setIsModalOpen(false)}
 				client={selectedClient}
 				onSave={handleSaveClient}
+				onDelete={selectedClient ? () => handleDeleteClient(selectedClient.id) : undefined}
+				isLoading={loading}
 			/>
 		</div>
 	)

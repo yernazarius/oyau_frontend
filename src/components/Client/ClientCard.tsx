@@ -41,8 +41,8 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit }) => {
 					</div>
 					<div>
 						<span className={`px-3 py-1 rounded-full text-sm font-medium ${client.category === 'vip'
-								? 'bg-yellow-100 text-yellow-800'
-								: 'bg-gray-100 text-gray-800'
+							? 'bg-yellow-100 text-yellow-800'
+							: 'bg-gray-100 text-gray-800'
 							}`}>
 							{client.category === 'vip' ? 'VIP' : 'Обычный'}
 						</span>
@@ -101,7 +101,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit }) => {
 												{visit.service}
 											</td>
 											<td className="px-4 py-3 whitespace-nowrap text-sm text-right">
-												{visit.amount.toLocaleString('ru-RU')} ₽
+												{visit.amount.toLocaleString('ru-RU')} ₸
 											</td>
 										</tr>
 									))}

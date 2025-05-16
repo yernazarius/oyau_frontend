@@ -56,6 +56,7 @@ export interface AppointmentModalProps {
 	selectedHour?: number
 	selectedDate?: Date
 	onSave: (appointment: Appointment) => void
+	onDelete?: (id: string) => void
 }
 
 export interface ButtonProps {

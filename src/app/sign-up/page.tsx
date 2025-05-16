@@ -76,6 +76,7 @@ export default function Home() {
         await login(formData.email, formData.password)
         router.push("/workspace-creation")
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Registration error:", err)
       if (err.response?.data?.detail) {
