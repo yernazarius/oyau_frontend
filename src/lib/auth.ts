@@ -22,6 +22,7 @@ export interface WorkspaceData {
 const extractUserIdFromToken = (token: string): number | null => {
 	try {
 		// Split the JWT and decode the payload (second part)
+
 		const base64Payload = token.split('.')[1]
 		const payload = JSON.parse(atob(base64Payload))
 		return payload.sub ? parseInt(payload.sub) : null
@@ -123,7 +124,7 @@ export const logout = () => {
 	clearAuthData()
 
 	// The API might have an endpoint to invalidate the cookie
-	axiosInstance.post('/api/auth/logout', {}, { withCredentials: true })
+	axiosInstance.post('/api/auth/jwt/logout', {}, { withCredentials: true })
 		.catch(error => console.error('Logout error:', error))
 		.finally(() => {
 			window.location.href = '/sign-in'

@@ -1,6 +1,6 @@
 import { CreateTodoPayload, Todo, UpdateTodoPayload } from "@/types/todo"
 
-const API_BASE_URL = "http://api.oyau.kz"
+const API_BASE_URL = "https://api.oyau.kz"
 
 export async function fetchTodos(): Promise<Todo[]> {
 	const response = await fetch(`${API_BASE_URL}/api/todo/todos`)

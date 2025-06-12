@@ -1,85 +1,85 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect } from "react";
-import ClientCard, { Client } from "@/components/Client/ClientCard";
-import ClientModal from "@/components/Client/ClientModal";
-import Button from "@/components/UI/Button";
-import Link from "next/link";
+import React, { useState, useEffect } from "react"
+import ClientCard, { Client } from "@/components/Client/ClientCard"
+import ClientModal from "@/components/Client/ClientModal"
+import Button from "@/components/UI/Button"
+import Link from "next/link"
 import {
   getClients,
   createClient,
   updateClient,
   deleteClient,
   apiClientToClient,
-} from "@/lib/client";
-import { enrichClientWithVisitHistory } from "@/lib/clientBookings";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
-import WorkspaceInfo from "@/components/Workspace/WorkspaceInfo";
-import WorkspaceSelector from "@/components/Workspace/WorkspaceSelector";
+} from "@/lib/client"
+import { enrichClientWithVisitHistory } from "@/lib/clientBookings"
+import { useWorkspace } from "@/contexts/WorkspaceContext"
+import WorkspaceInfo from "@/components/Workspace/WorkspaceInfo"
+import WorkspaceSelector from "@/components/Workspace/WorkspaceSelector"
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clients, setClients] = useState<Client[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(
     undefined,
-  );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { workspaceId } = useWorkspace();
+  )
+  const [searchQuery, setSearchQuery] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { workspaceId } = useWorkspace()
 
   // Fetch clients when the page loads
   useEffect(() => {
     if (workspaceId) {
-      fetchClients();
+      fetchClients()
     }
-  }, [workspaceId]);
+  }, [workspaceId])
 
   const fetchClients = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const apiClients = await getClients();
+      const apiClients = await getClients()
 
       // Convert API clients to frontend Client model
       let frontendClients = apiClients.map((apiClient) => {
-        const client = apiClientToClient(apiClient);
+        const client = apiClientToClient(apiClient)
         // Initialize visits as empty array if not available
         if (!client.visits) {
-          client.visits = [];
+          client.visits = []
         }
-        return client;
-      });
+        return client
+      })
 
       // Enrich clients with visit history
       const enrichedClients = await Promise.all(
         frontendClients.map(async (client) => {
-          return await enrichClientWithVisitHistory(client);
+          return await enrichClientWithVisitHistory(client)
         }),
-      );
+      )
 
-      setClients(enrichedClients);
+      setClients(enrichedClients)
     } catch (err) {
-      console.error("Error fetching clients:", err);
-      setError("Failed to load clients. Please try again.");
+      console.error("Error fetching clients:", err)
+      setError("Failed to load clients. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleEditClient = (client: Client) => {
-    setSelectedClient(client);
-    setIsModalOpen(true);
-  };
+    setSelectedClient(client)
+    setIsModalOpen(true)
+  }
 
   const handleAddClient = () => {
-    setSelectedClient(undefined);
-    setIsModalOpen(true);
-  };
+    setSelectedClient(undefined)
+    setIsModalOpen(true)
+  }
 
   const handleSaveClient = async (client: Client) => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
       if (selectedClient) {
@@ -92,10 +92,10 @@ export default function ClientsPage() {
           personal_discount: client.discount,
           comments: client.notes,
           category: client.category,
-        });
+        })
 
         // Refresh client list
-        await fetchClients();
+        await fetchClients()
       } else {
         // Create new client
         await createClient({
@@ -106,47 +106,47 @@ export default function ClientsPage() {
           personal_discount: client.discount,
           comments: client.notes,
           category: client.category,
-        });
+        })
 
         // Refresh client list
-        await fetchClients();
+        await fetchClients()
       }
 
       // Close the modal
-      setIsModalOpen(false);
+      setIsModalOpen(false)
     } catch (err) {
-      console.error("Error saving client:", err);
-      setError("Failed to save client. Please try again.");
+      console.error("Error saving client:", err)
+      setError("Failed to save client. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleDeleteClient = async (clientId: string) => {
     if (confirm("Вы уверены, что хотите удалить этого клиента?")) {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
 
       try {
-        await deleteClient(parseInt(clientId));
-        await fetchClients();
-        setIsModalOpen(false);
+        await deleteClient(parseInt(clientId))
+        await fetchClients()
+        setIsModalOpen(false)
       } catch (err) {
-        console.error("Error deleting client:", err);
-        setError("Failed to delete client. Please try again.");
+        console.error("Error deleting client:", err)
+        setError("Failed to delete client. Please try again.")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
-  };
+  }
 
   const filteredClients = searchQuery.trim()
     ? clients.filter(
-        (client) =>
-          client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          client.phoneNumber.includes(searchQuery),
-      )
-    : clients;
+      (client) =>
+        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.phoneNumber.includes(searchQuery),
+    )
+    : clients
 
   // If there's no workspace selected, show the workspace selector
   if (!workspaceId) {
@@ -166,7 +166,7 @@ export default function ClientsPage() {
           </div>
         </main>
       </div>
-    );
+    )
   }
 
   return (
@@ -285,7 +285,7 @@ export default function ClientsPage() {
             </svg>
           </Link>
           <Link
-            href="/login"
+            href="/chat?idInstance=7105259898&apiTokenInstance=359e19e4e3a84d458570c322efb52df6faf936d766714f928e&phone=77079594101"
             className="p-3 text-gray-600 hover:bg-gray-100 rounded-lg"
           >
             <svg
@@ -450,5 +450,5 @@ export default function ClientsPage() {
         isLoading={loading}
       />
     </div>
-  );
+  )
 }

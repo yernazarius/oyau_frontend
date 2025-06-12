@@ -279,6 +279,8 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       )
     } finally {
       console.log("Submission process finished (finally block). Resetting submission flags.")
+      // reload page 
+      window.location.reload()
       submissionInProgressRef.current = false
       submissionPromiseRef.current = null
       setIsSubmitting(false)

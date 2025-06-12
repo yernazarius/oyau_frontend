@@ -16,9 +16,9 @@ export default function BookingPage() {
   return (
     <div className="flex flex-col h-screen">
       <MainHeader />
-      <main className="flex flex-grow overflow-hidden">
+      <main className="flex flex-grow">
         <Sidebar />
-        <div className="flex-grow p-6 overflow-hidden">
+        <div className="flex-grow p-6">
           <h1 className="text-2xl font-bold mb-6">Главная страница</h1>
           <div className="h-full">
             <Calendar />
