@@ -51,7 +51,7 @@ export const getWorkspace = async (
   workspaceId: number,
 ): Promise<WorkspaceRead> => {
   const response = await axiosInstance.get(
-    `/api/workspace/workspaces/${workspaceId}`,
+    `/api/workspace/workspaces-by-id/${workspaceId}`,
   )
   return response.data
 }
@@ -65,7 +65,7 @@ export const getWorkspaceByUser = async (
   userId: number,
 ): Promise<WorkspaceRead> => {
   const response = await axiosInstance.get(
-    `/api/workspace/workspaces/${userId}`,
+    `/api/workspace/workspaces-by-user-id/${userId}`,
   )
   return response.data
 }

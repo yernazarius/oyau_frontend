@@ -16,7 +16,7 @@ export default function CreateChatPage() {
   // Redirect to login if credentials aren't available
   useEffect(() => {
     if (!idInstance || !apiTokenInstance) {
-      router.push("/login");
+      router.push("/sign-in");
     }
   }, [idInstance, apiTokenInstance, router]);
 

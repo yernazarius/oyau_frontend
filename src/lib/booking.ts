@@ -55,6 +55,7 @@ export const bookingToAppointment = (booking: BookingRead): Appointment => {
   }
 
   return {
+    id: booking.id.toString(),
     startTime: booking.start_time || "00:00",
     endTime: booking.end_time || "00:00",
     clientName:
@@ -128,8 +129,9 @@ export const updateBooking = async (
   return response.data
 }
 
-export const deleteBooking = async (bookingId: number): Promise<void> => {
-  await axiosInstance.delete(`/api/booking/bookings?booking_id=${bookingId}`)
+export const deleteBooking = async (bookingId: number) => {
+  const response = await axiosInstance.delete('/api/booking/bookings?booking_id=' + bookingId)
+  return response.data
 }
 
 export const getBooking = async (bookingId: number): Promise<BookingRead> => {

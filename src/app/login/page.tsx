@@ -1,38 +1,38 @@
 // app/login/page.tsx
-"use client";
+"use client"
 
-import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import styles from "./login.module.css";
+import { useState, FormEvent } from "react"
+import { useRouter } from "next/navigation"
+import styles from "./login.module.css"
 
 export default function LoginPage() {
-  const [idInstance, setIdInstance] = useState("");
-  const [apiTokenInstance, setApiTokenInstance] = useState("");
-  const router = useRouter();
+  const [idInstance, setIdInstance] = useState("")
+  const [apiTokenInstance, setApiTokenInstance] = useState("")
+  const router = useRouter()
 
   const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
       const response = await fetch(
         `https://7105.api.greenapi.com/waInstance${encodeURIComponent(idInstance)}/getSettings/${encodeURIComponent(apiTokenInstance)}`,
-      );
+      )
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Network response was not ok")
       }
 
-      const data = await response.json();
-      console.log("Login successful:", data);
+      const data = await response.json()
+      console.log("Login successful:", data)
 
       // Navigate to create chat page with credentials
       router.push(
         `/createchat?idInstance=${encodeURIComponent(idInstance)}&apiTokenInstance=${encodeURIComponent(apiTokenInstance)}`,
-      );
+      )
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Login failed:", error)
     }
-  };
+  }
 
   return (
     <div className="page-container">
@@ -65,5 +65,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-  );
+  )
 }

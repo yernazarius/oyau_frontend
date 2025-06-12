@@ -4,8 +4,26 @@ import React from "react"
 import Calendar from "@/components/Calendar/Calendar"
 import Link from "next/link"
 import WorkspaceInfo from "@/components/Workspace/WorkspaceInfo"
+import { useRouter } from "next/navigation"
 
 export default function BookingPage() {
+  const router = useRouter()
+
+  const handleLogout = () => {
+    // Delete all cookies
+    document.cookie.split(";").forEach(cookie => {
+      const [name] = cookie.trim().split("=")
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+    })
+
+    // Clear local storage items if any are being used for auth
+    localStorage.removeItem("activeWorkspaceId")
+    localStorage.removeItem("token") // If you're using token-based auth
+
+    // Redirect to login page
+    router.push("/SignIn")
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <header className="bg-white shadow-sm border-b border-gray-200 py-4">
@@ -75,6 +93,27 @@ export default function BookingPage() {
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </button>
+            <button
+            onClick={handleLogout}
+            className="p-3 text-red-600 hover:bg-red-50 rounded-lg"
+            title="Выйти"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
           </div>
         </div>
       </header>
@@ -119,7 +158,7 @@ export default function BookingPage() {
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </Link>
-          <a
+          <Link
             href="/login"
             className="p-3 text-gray-600 hover:bg-gray-100 rounded-lg"
           >
@@ -138,8 +177,9 @@ export default function BookingPage() {
               <line x1="8" y1="21" x2="16" y2="21"></line>
               <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
-          </a>
-          <a
+          </Link>
+
+          <Link
             href="#"
             className="p-3 text-gray-600 hover:bg-gray-100 rounded-lg"
           >
@@ -158,7 +198,7 @@ export default function BookingPage() {
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
-          </a>
+          </Link>
           <a
             href="#"
             className="p-3 text-gray-600 hover:bg-gray-100 rounded-lg"
@@ -185,6 +225,7 @@ export default function BookingPage() {
               <line x1="17" y1="16" x2="23" y2="16"></line>
             </svg>
           </a>
+
         </aside>
 
         <div className="flex-grow p-6 overflow-hidden">

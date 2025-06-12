@@ -126,7 +126,7 @@ export const logout = () => {
 	axiosInstance.post('/api/auth/logout', {}, { withCredentials: true })
 		.catch(error => console.error('Logout error:', error))
 		.finally(() => {
-			window.location.href = '/login'
+			window.location.href = '/sign-in'
 		})
 }
 

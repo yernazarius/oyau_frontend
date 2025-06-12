@@ -1,41 +1,41 @@
 // app/chat/page.tsx
-"use client";
+"use client"
 
-import { useEffect, useState, useRef, FormEvent, ChangeEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
-import styles from "./chat.module.css";
+import { useEffect, useState, useRef, FormEvent, ChangeEvent } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
+import styles from "./chat.module.css"
 
 interface Message {
-  text?: string;
-  type?: "sender" | "recipient";
-  index?: number;
+  text?: string
+  type?: "sender" | "recipient"
+  index?: number
 }
 
 interface ContactInfo {
-  avatar?: string;
-  name?: string;
+  avatar?: string
+  name?: string
 }
 
 export default function ChatPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const idInstance = searchParams.get("idInstance") || "";
-  const apiTokenInstance = searchParams.get("apiTokenInstance") || "";
-  const phone = searchParams.get("phone") || "";
+  const idInstance = searchParams.get("idInstance") || ""
+  const apiTokenInstance = searchParams.get("apiTokenInstance") || ""
+  const phone = searchParams.get("phone") || ""
 
-  const [messages, setMessages] = useState<Message[]>([{}]);
-  const [outgoing, setOutgoing] = useState("");
-  const [info, setInfo] = useState<ContactInfo>({});
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [messages, setMessages] = useState<Message[]>([{}])
+  const [outgoing, setOutgoing] = useState("")
+  const [info, setInfo] = useState<ContactInfo>({})
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Redirect to login if credentials aren't available
   useEffect(() => {
     if (!idInstance || !apiTokenInstance || !phone) {
-      router.push("/login");
+      router.push("/sign-in")
     }
-  }, [idInstance, apiTokenInstance, phone, router]);
+  }, [idInstance, apiTokenInstance, phone, router])
 
   useEffect(() => {
     // Fetch contact info
@@ -52,46 +52,46 @@ export default function ChatPage() {
               chatId: `${phone}@c.us`,
             }),
           },
-        );
+        )
 
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error("Network response was not ok")
         }
 
-        const contactInfo = await response.json();
-        setInfo(contactInfo);
+        const contactInfo = await response.json()
+        setInfo(contactInfo)
       } catch (error) {
-        console.error("Failed to get contact info:", error);
+        console.error("Failed to get contact info:", error)
       }
-    };
+    }
 
-    fetchInfo();
+    fetchInfo()
 
     // Connect to WebSocket server
-    const socket = new WebSocket("ws://localhost:5000");
+    const socket = new WebSocket("ws://localhost:5000")
 
     socket.onopen = () => {
-      console.log("Connected to WebSocket server");
-    };
+      console.log("Connected to WebSocket server")
+    }
 
     socket.onmessage = (event) => {
-      const parsed = JSON.parse(event.data);
-      const messageText = parsed?.messageData?.textMessageData?.textMessage;
-      const chatId = parsed?.senderData?.chatId;
+      const parsed = JSON.parse(event.data)
+      const messageText = parsed?.messageData?.textMessageData?.textMessage
+      const chatId = parsed?.senderData?.chatId
 
       if (chatId == `${phone}@c.us`) {
         setMessages((prev) => [
           ...prev,
           { text: messageText, type: "recipient", index: prev.length },
-        ]);
+        ])
       }
-    };
+    }
 
-    return () => socket.close();
-  }, [idInstance, apiTokenInstance, phone]);
+    return () => socket.close()
+  }, [idInstance, apiTokenInstance, phone])
 
   const handleSend = async () => {
-    if (!outgoing.trim()) return;
+    if (!outgoing.trim()) return
 
     try {
       const response = await fetch(
@@ -106,44 +106,44 @@ export default function ChatPage() {
             message: outgoing,
           }),
         },
-      );
+      )
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Network response was not ok")
       }
 
-      const data = await response.json();
-      console.log("Successfully sent message:", data);
+      const data = await response.json()
+      console.log("Successfully sent message:", data)
 
-      setOutgoing("");
+      setOutgoing("")
       if (textareaRef.current) {
-        textareaRef.current.style.height = "20px";
-        textareaRef.current.focus();
+        textareaRef.current.style.height = "20px"
+        textareaRef.current.focus()
       }
 
       setMessages((prev) => [
         ...prev,
         { text: outgoing, type: "sender", index: prev.length },
-      ]);
+      ])
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Failed to send message:", error)
     }
-  };
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   const handleInput = () => {
-    const textarea = textareaRef.current;
+    const textarea = textareaRef.current
     if (textarea) {
-      textarea.style.height = "20px";
-      textarea.style.height = textarea.scrollHeight - 20 + "px";
+      textarea.style.height = "20px"
+      textarea.style.height = textarea.scrollHeight - 20 + "px"
     }
-  };
+  }
 
   return (
     <div className="chat-container">
@@ -192,5 +192,5 @@ export default function ChatPage() {
         </button>
       </div>
     </div>
-  );
+  )
 }

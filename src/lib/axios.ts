@@ -44,7 +44,7 @@ axiosInstance.interceptors.response.use(
 				console.error('Failed to refresh authentication:', err)
 
 				// If refresh fails, redirect to login
-				window.location.href = '/login'
+				window.location.href = '/sign-in'
 				return Promise.reject(error)
 			}
 		}

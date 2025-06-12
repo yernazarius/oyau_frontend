@@ -70,3 +70,15 @@ export interface ButtonProps {
   type?: "button" | "submit" | "reset"
   className?: string
 }
+
+export interface ApiClient {
+  id: string
+  name: string
+  surname: string
+  phone?: string
+  category?: string // "vip" or other
+  birth_date?: string
+  personal_discount?: number | null
+  prefernces?: string // Assuming this typo matches your API: prefernces
+  comments?: string
+}

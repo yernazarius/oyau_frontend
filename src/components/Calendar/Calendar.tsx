@@ -14,7 +14,7 @@ import {
 	appointmentToBookingUpdate
 } from '@/lib/booking'
 import { findClientByPhone, createClient } from '@/lib/client'
-
+ 
 const Calendar: React.FC = () => {
 	const [currentDate, setCurrentDate] = useState(new Date())
 	const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
@@ -182,20 +182,35 @@ const Calendar: React.FC = () => {
 		}
 	}
 
+	// const handleDeleteAppointment = async (appointmentId: string) => {
+	// 	// if (confirm('Are you sure you want to delete this appointment?')) {
+	// 	setLoading(true)
+	// 	try {
+	// 		await deleteBooking(parseInt(appointmentId))
+	// 		setAppointments(appointments.filter(app => app.id !== appointmentId))
+	// 		setIsModalOpen(false)
+	// 	} catch (err) {
+	// 		console.error('Error deleting appointment:', err)
+	// 		setError('Failed to delete appointment. Please try again.')
+	// 	} finally {
+	// 		setLoading(false)
+	// 		// }
+	// 	}
+	// }
+
 	const handleDeleteAppointment = async (appointmentId: string) => {
-		if (confirm('Are you sure you want to delete this appointment?')) {
-			setLoading(true)
-			try {
-				await deleteBooking(parseInt(appointmentId))
-				setAppointments(appointments.filter(app => app.id !== appointmentId))
-				setIsModalOpen(false)
-			} catch (err) {
-				console.error('Error deleting appointment:', err)
-				setError('Failed to delete appointment. Please try again.')
-			} finally {
-				setLoading(false)
-			}
-		}
+
+	setLoading(true);
+	try {
+		await deleteBooking(parseInt(appointmentId));
+		setAppointments(appointments.filter(app => app.id !== appointmentId));
+		setIsModalOpen(false);
+	} catch (err) {
+		console.error('Error deleting appointment:', err);
+		setError('Failed to delete appointment. Please try again.');
+	} finally {
+		setLoading(false);
+	}
 	}
 
 	const handleWorkspaceSelected = () => {
