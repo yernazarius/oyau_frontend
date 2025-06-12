@@ -150,6 +150,6 @@ export const getBookingsByWorkspace = async (
   const response = await axiosInstance.get(
     `/api/booking/bookings/workspace/${workspaceId}`,
   )
-  i
+
   return response.data
 }
