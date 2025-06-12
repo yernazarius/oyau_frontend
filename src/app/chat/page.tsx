@@ -5,6 +5,8 @@ import { useEffect, useState, useRef, FormEvent, ChangeEvent } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import styles from "./chat.module.css"
+import MainHeader from "@/components/Header/MainHeader"
+import Sidebar from "@/components/Sidebar/Sidebar"
 
 interface Message {
   text?: string
@@ -146,51 +148,64 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="chat-container">
-      <div className="header">
-        {info.avatar ? (
-          <Image
-            src={info.avatar}
-            alt="avatar"
-            width={40}
-            height={40}
-            className="avatar"
+
+    <div className="flex flex-col h-screen">
+      <MainHeader />
+      <main className="flex flex-grow overflow-hidden">
+        <Sidebar />
+        <div className="flex-grow p-6 overflow-hidden">
+          <h1 className="text-2xl font-bold mb-6">Сообщения</h1>
+          <div className="h-full">
+            <div className="chat-container">
+                <div className="header">
+          {info.avatar ? (
+            <Image
+              src={info.avatar}
+              alt="avatar"
+              width={40}
+              height={40}
+              className="avatar"  
+            />
+          ) : (
+            <div className="avatar-placeholder">
+              {/* You can use a placeholder avatar or initials here */}
+              {info.name?.charAt(0) || phone.charAt(0)}
+            </div>
+          )}
+          <span className="username">{info.name || phone}</span>
+        </div>
+
+        <div className="messages">
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`message ${msg.type || ""}`}>
+              <span>{msg.text}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="input-area">
+          <textarea
+            ref={textareaRef}
+            placeholder="Type a message"
+            className="message-input"
+            value={outgoing}
+            rows={1}
+            onInput={handleInput}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              setOutgoing(e.target.value)
+            }
+            onKeyDown={handleKeyDown}
+            style={{ marginRight: "10px" }}
           />
-        ) : (
-          <div className="avatar-placeholder">
-            {/* You can use a placeholder avatar or initials here */}
-            {info.name?.charAt(0) || phone.charAt(0)}
+          <button type="button" className="send-button" onClick={handleSend}>
+            Send
+          </button>
+        </div>
+            </div>
           </div>
-        )}
-        <span className="username">{info.name || phone}</span>
-      </div>
-
-      <div className="messages">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`message ${msg.type || ""}`}>
-            <span>{msg.text}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="input-area">
-        <textarea
-          ref={textareaRef}
-          placeholder="Type a message"
-          className="message-input"
-          value={outgoing}
-          rows={1}
-          onInput={handleInput}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-            setOutgoing(e.target.value)
-          }
-          onKeyDown={handleKeyDown}
-          style={{ marginRight: "10px" }}
-        />
-        <button type="button" className="send-button" onClick={handleSend}>
-          Send
-        </button>
-      </div>
+        </div>
+      </main>
     </div>
+
   )
 }
