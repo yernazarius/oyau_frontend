@@ -1,0 +1,47 @@
+/* Add this to your global CSS or component styling */
+.recommendation-content strong {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.recommendation-content h1,
+.recommendation-content h2,
+.recommendation-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+}
+
+.recommendation-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.recommendation-content ul,
+.recommendation-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.recommendation-content li {
+    margin-bottom: 0.5rem;
+}
+
+/* Improve scrollbar appearance */
+.recommendation-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.recommendation-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.recommendation-content::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+}
+
+.recommendation-content::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

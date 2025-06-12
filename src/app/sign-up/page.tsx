@@ -220,7 +220,7 @@ export default function Home() {
             <div className="text-center text-sm text-gray-500 pt-2">
               Уже есть аккаунт?{" "}
               <Link
-                href="/login"
+                href="/sign-in"
                 className="text-[#5885EA] inline-flex items-center gap-1 hover:underline"
               >
                 <LogIn size={16} />
