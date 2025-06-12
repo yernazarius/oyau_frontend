@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import React from "react";
-import Calendar from "@/components/Calendar/Calendar";
-import Link from "next/link";
-import WorkspaceInfo from "@/components/Workspace/WorkspaceInfo";
+import React from "react"
+import Calendar from "@/components/Calendar/Calendar"
+import Link from "next/link"
+import WorkspaceInfo from "@/components/Workspace/WorkspaceInfo"
 
 export default function BookingPage() {
   return (
@@ -16,7 +16,7 @@ export default function BookingPage() {
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-500">
-              Подписка действует до 07.04.2024
+              Подписка действует до 18.06.2025
             </div>
             <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
               Обновить
@@ -195,5 +195,5 @@ export default function BookingPage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

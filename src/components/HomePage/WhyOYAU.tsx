@@ -1,5 +1,5 @@
-import Image from "next/image";
-
+import Image from "next/image"
+// import logoSrc from '/public/logo.svg'
 export default function WhyOYAU() {
   return (
     <div className="mx-24 mt-16 rounded-2xl bg-white shadow-lg">
@@ -7,7 +7,7 @@ export default function WhyOYAU() {
         <div className="flex items-center mb-8">
           <h1 className="text-6xl font-semibold text-[#1A1A1A]">Почему</h1>
           <Image
-            src="/Logo.svg"
+            src="/Logo.png"
             width={400}
             height={400}
             alt="Logo"
@@ -34,5 +34,5 @@ export default function WhyOYAU() {
         </ul>
       </div>
     </div>
-  );
+  )
 }

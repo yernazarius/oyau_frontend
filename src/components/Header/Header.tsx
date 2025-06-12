@@ -1,19 +1,21 @@
-"use client";
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+"use client"
+import { useState } from "react"
+import Image from "next/image"
+// import logoSrc from '/public/logo.svg'
+
+import Link from "next/link"
 
 export default function Header() {
-  const [activeTab, setActiveTab] = useState("Главная");
+  const [activeTab, setActiveTab] = useState("Главная")
 
-  const menuItems = ["Главная", "О нас", "Вопросы", "Контакты"];
+  const menuItems = ["Главная", "О нас", "Вопросы", "Контакты"]
 
   return (
     <div className="mx-24 mt-16">
       <div className="flex justify-between items-center h-full">
         <div>
           <Image
-            src="/Logo.svg"
+            src="/Logo.png"
             width={200}
             height={200}
             alt="Logo"
@@ -27,11 +29,10 @@ export default function Header() {
               <li
                 key={item}
                 onClick={() => setActiveTab(item)}
-                className={`flex-1 flex justify-center items-center rounded-3xl h-full px-4 cursor-pointer transition-all duration-300 ${
-                  activeTab === item
-                    ? "bg-[#5885EA] text-white"
-                    : "hover:bg-gray-200"
-                }`}
+                className={`flex-1 flex justify-center items-center rounded-3xl h-full px-4 cursor-pointer transition-all duration-300 ${activeTab === item
+                  ? "bg-[#5885EA] text-white"
+                  : "hover:bg-gray-200"
+                  }`}
               >
                 {item}
               </li>
@@ -47,5 +48,5 @@ export default function Header() {
         </div>
       </div>
     </div>
-  );
+  )
 }

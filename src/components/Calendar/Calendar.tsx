@@ -14,7 +14,6 @@ import {
 	appointmentToBookingUpdate
 } from '@/lib/booking'
 import { findClientByPhone, createClient } from '@/lib/client'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const Calendar: React.FC = () => {
 	const [currentDate, setCurrentDate] = useState(new Date())
@@ -26,27 +25,54 @@ const Calendar: React.FC = () => {
 	const [isNewAppointment, setIsNewAppointment] = useState(true)
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
+	const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(null)
 
-	// Use the workspace context
-	const { workspace, workspaceId, error: workspaceError } = useWorkspace()
-
-	// Fetch bookings when date or workspace changes
+	// Check localStorage for workspace ID
 	useEffect(() => {
-		if (workspaceId) {
-			fetchBookings(workspaceId)
-		} else if (workspaceError) {
-			setError(workspaceError)
+		const checkWorkspaceId = () => {
+			const storedId = localStorage.getItem("activeWorkspaceId")
+			console.log("🔍 Calendar: Checking localStorage, found:", storedId)
+
+			if (storedId) {
+				const parsedId = parseInt(storedId)
+				if (!isNaN(parsedId)) {
+					setActiveWorkspaceId(parsedId)
+				}
+			} else {
+				setActiveWorkspaceId(null)
+			}
 		}
-	}, [currentDate, workspaceId, workspaceError])
+
+		// Check immediately
+		checkWorkspaceId()
+
+		// Listen for storage changes
+		const handleStorageChange = () => {
+			checkWorkspaceId()
+		}
+
+		window.addEventListener('storage', handleStorageChange)
+
+		// Also check periodically in case storage event doesn't fire
+		const interval = setInterval(checkWorkspaceId, 500)
+
+		return () => {
+			window.removeEventListener('storage', handleStorageChange)
+			clearInterval(interval)
+		}
+	}, [])
+
+	useEffect(() => {
+		if (activeWorkspaceId) {
+			console.log("✅ WorkspaceId found, fetching bookings for:", activeWorkspaceId)
+			fetchBookings(activeWorkspaceId)
+		}
+	}, [currentDate, activeWorkspaceId])
 
 	const fetchBookings = async (wsId: number) => {
 		setLoading(true)
 		try {
 			const bookings = await getBookingsByWorkspace(wsId)
-			// Filter bookings for the current date if needed
-			// This depends on how your API handles dates
-
-			// Convert API bookings to frontend appointments
 			const newAppointments = bookings.map(booking => bookingToAppointment(booking))
 			setAppointments(newAppointments)
 		} catch (err) {
@@ -91,21 +117,19 @@ const Calendar: React.FC = () => {
 	}
 
 	const handleSaveAppointment = async (appointment: Appointment) => {
-		if (!workspaceId) {
+		if (!activeWorkspaceId) {
 			setError('No workspace selected. Please select a workspace first.')
 			return
 		}
 
 		setLoading(true)
 		try {
-			// Check if client exists or create a new one
 			let clientId: number
 			const existingClient = await findClientByPhone(appointment.phoneNumber)
 
 			if (existingClient) {
 				clientId = existingClient.id
 			} else {
-				// Create a new client
 				const nameParts = appointment.clientName.split(' ')
 				const firstName = nameParts[0] || ''
 				const lastName = nameParts.slice(1).join(' ') || ''
@@ -124,11 +148,10 @@ const Calendar: React.FC = () => {
 			}
 
 			if (isNewAppointment) {
-				// Create new booking
 				const bookingData = appointmentToBookingCreate(
 					appointment,
 					clientId,
-					workspaceId
+					activeWorkspaceId
 				)
 
 				const newBooking = await createBooking(bookingData)
@@ -136,7 +159,6 @@ const Calendar: React.FC = () => {
 
 				setAppointments([...appointments, newAppointment])
 			} else {
-				// Update existing booking
 				const bookingData = appointmentToBookingUpdate(
 					appointment,
 					clientId
@@ -176,18 +198,34 @@ const Calendar: React.FC = () => {
 		}
 	}
 
-	// If no workspace is selected, show the workspace selector
-	if (!workspaceId) {
+	const handleWorkspaceSelected = () => {
+		// Force re-check of localStorage
+		const storedId = localStorage.getItem("activeWorkspaceId")
+		if (storedId) {
+			const parsedId = parseInt(storedId)
+			if (!isNaN(parsedId)) {
+				setActiveWorkspaceId(parsedId)
+			}
+		}
+		setError(null)
+	}
+
+	console.log("🎯 Calendar render decision - activeWorkspaceId:", activeWorkspaceId)
+
+	if (!activeWorkspaceId) {
+		console.log("📝 Showing WorkspaceSelector because activeWorkspaceId is:", activeWorkspaceId)
 		return (
 			<div className="h-full flex flex-col justify-center items-center">
 				<div className="w-full max-w-md">
 					<WorkspaceSelector
-						onSelect={() => setError(null)}
+						onSelect={handleWorkspaceSelected}
 					/>
 				</div>
 			</div>
 		)
 	}
+
+	console.log("📅 Showing Calendar with activeWorkspaceId:", activeWorkspaceId)
 
 	return (
 		<div className="h-full flex flex-col">
@@ -206,14 +244,12 @@ const Calendar: React.FC = () => {
 					animation: pulse-border 2s infinite;
 				}
 				
-				/* Styling for multi-hour appointments */
 				.multi-hour-appointment {
 					position: absolute;
 					z-index: 10;
 					width: calc(100% - 0.5rem);
 				}
 				
-				/* Fix calendar positions */
 				.calendar-grid {
 					position: relative;
 				}
@@ -254,10 +290,10 @@ const Calendar: React.FC = () => {
 						onTimeSlotClick={handleTimeSlotClick}
 					/>
 				)}
-				{/* Week and Month views would be implemented here */}
 			</div>
 
 			<AppointmentModal
+				workspaceId={activeWorkspaceId}
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
 				appointment={selectedAppointment}

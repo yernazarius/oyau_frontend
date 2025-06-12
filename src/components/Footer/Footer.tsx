@@ -1,5 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
+import Image from "next/image"
+// import logoSrc from '/public/logo.svg'
+import Link from "next/link"
 
 export default function Footer() {
   return (
@@ -8,7 +9,7 @@ export default function Footer() {
         {/* Logo + Description */}
         <div className="max-w-sm">
           <Image
-            src="/Logo.svg"
+            src="/Logo.png"
             width={150}
             height={150}
             alt="Logo"
@@ -76,5 +77,5 @@ export default function Footer() {
         © {new Date().getFullYear()} OYAU CRM. Все права защищены.
       </div>
     </footer>
-  );
+  )
 }

@@ -1,5 +1,5 @@
 // next.config.ts
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   images: {
@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-};
+  compiler: {
+    styledComponents: true,
+  },
+  webpack: (config) => {
+    config.module?.rules.push({
+      test: /\.svg$/,
+      use: "raw-loader",
+    })
+    //...
+    return config
+  },
 
-export default nextConfig;
+}
+
+export default nextConfig

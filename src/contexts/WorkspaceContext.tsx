@@ -1,6 +1,6 @@
 "use client"
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react'
-import { getCurrentWorkspace, WorkspaceRead } from '@/lib/workspace'
+import { getWorkspace, WorkspaceRead } from '@/lib/workspace'
 import { getUserId } from '@/lib/auth'
 
 interface WorkspaceContextType {
@@ -44,15 +44,24 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
 			if (!currentUserId) {
 				setError('User not authenticated')
+				setLoading(false)
 				return
 			}
 
-			// Get workspace
-			const workspaceData = await getCurrentWorkspace()
-			setWorkspace(workspaceData)
+			// Check for active workspace ID in localStorage
+			const activeWorkspaceId = localStorage.getItem('activeWorkspaceId')
 
-			if (!workspaceData) {
-				setError('No workspace found')
+			if (activeWorkspaceId) {
+				// Fetch the specific workspace by ID
+				const workspaceData = await getWorkspace(parseInt(activeWorkspaceId))
+				setWorkspace(workspaceData)
+
+				if (!workspaceData) {
+					setError('No workspace found')
+				}
+			} else {
+				// No workspace selected yet
+				setWorkspace(null)
 			}
 		} catch (err) {
 			console.error('Error fetching workspace:', err)
@@ -64,6 +73,16 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
 	useEffect(() => {
 		fetchWorkspace()
+
+		// Listen for storage changes (in case workspace is changed in another tab)
+		const handleStorageChange = (e: StorageEvent) => {
+			if (e.key === 'activeWorkspaceId') {
+				fetchWorkspace()
+			}
+		}
+
+		window.addEventListener('storage', handleStorageChange)
+		return () => window.removeEventListener('storage', handleStorageChange)
 	}, [])
 
 	const refreshWorkspace = async () => {

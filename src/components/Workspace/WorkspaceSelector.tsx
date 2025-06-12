@@ -1,60 +1,97 @@
-import React, { useState, useEffect } from "react";
-import { getWorkspaces, WorkspaceRead } from "@/lib/workspace";
-import { useWorkspace } from "@/contexts/WorkspaceContext";
-import Button from "../UI/Button";
+'use client'
+
+import React, { useState, useEffect } from "react"
+import { getWorkspaces, WorkspaceRead } from "@/lib/workspace"
+import { useWorkspace } from "@/contexts/WorkspaceContext"
+import Button from "../UI/Button"
 
 interface WorkspaceSelectorProps {
-  onSelect?: () => void;
+  onSelect?: () => void
+
 }
 
 const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({ onSelect }) => {
-  const [workspaces, setWorkspaces] = useState<WorkspaceRead[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { workspace, refreshWorkspace } = useWorkspace();
+  const [workspaces, setWorkspaces] = useState<WorkspaceRead[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [selecting, setSelecting] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const { workspace, workspaceId, refreshWorkspace } = useWorkspace()
 
   useEffect(() => {
-    fetchWorkspaces();
-  }, []);
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (isMounted) {
+      fetchWorkspaces()
+    }
+  }, [isMounted])
+
+  // Watch for workspace changes
+  useEffect(() => {
+    console.log("👀 WorkspaceSelector: Workspace changed:", { workspace, workspaceId })
+
+    // If we now have a workspace ID, trigger the onSelect callback
+    if (workspaceId && selecting) {
+      console.log("🎉 WorkspaceSelector: Workspace selected successfully!")
+      setSelecting(false)
+      if (onSelect) {
+        onSelect()
+      }
+    }
+  }, [workspaceId, workspace, selecting, onSelect])
 
   const fetchWorkspaces = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const workspaceList = await getWorkspaces();
-      setWorkspaces(workspaceList);
+      const workspaceList = await getWorkspaces()
+      setWorkspaces(workspaceList)
     } catch (err) {
-      console.error("Error fetching workspaces:", err);
-      setError("Failed to load workspaces. Please try again.");
+      console.error("Error fetching workspaces:", err)
+      setError("Failed to load workspaces. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handleSelectWorkspace = async (workspaceId: number) => {
+  const handleSelectWorkspace = async (selectedWorkspaceId: number) => {
+    if (!isMounted || selecting) return
+
+    setSelecting(true)
+    setError(null)
+
     try {
-      // Here you would implement the logic to select a workspace
-      // This might involve setting a workspaceId in localStorage or cookies
-      localStorage.setItem("activeWorkspaceId", workspaceId.toString());
+      console.log("🔧 WorkspaceSelector: Setting workspace in localStorage:", selectedWorkspaceId)
+      localStorage.setItem("activeWorkspaceId", selectedWorkspaceId.toString())
 
-      // Refresh the workspace context
-      await refreshWorkspace();
+      console.log("🔄 WorkspaceSelector: Calling refreshWorkspace...")
+      await refreshWorkspace()
 
-      if (onSelect) {
-        onSelect();
-      }
+      console.log("⏳ WorkspaceSelector: Waiting for context to update...")
+      // The useEffect above will handle the completion when workspaceId updates
     } catch (err) {
-      console.error("Error selecting workspace:", err);
-      setError("Failed to select workspace. Please try again.");
+      console.error("❌ WorkspaceSelector: Error selecting workspace:", err)
+      setError("Failed to select workspace. Please try again.")
+      setSelecting(false)
     }
-  };
+  }
+
+  if (!isMounted) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
       <div className="flex justify-center items-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -69,14 +106,21 @@ const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({ onSelect }) => {
         </div>
       )}
 
+      {selecting && (
+        <div className="flex justify-center items-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <span className="ml-2">Selecting workspace...</span>
+        </div>
+      )}
+
       {workspaces.length > 0 ? (
         <div className="space-y-3">
           {workspaces.map((ws) => (
             <div
               key={ws.id}
-              className={`border rounded-lg p-4 cursor-pointer transition hover:bg-blue-50
-                ${workspace?.id === ws.id ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
-              onClick={() => handleSelectWorkspace(ws.id)}
+              className={`border rounded-lg p-4 cursor-pointer transition hover:bg-blue-50 ${selecting ? 'opacity-50 cursor-not-allowed' : ''
+                } ${workspace?.id === ws.id ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
+              onClick={() => !selecting && handleSelectWorkspace(ws.id)}
             >
               <div className="font-medium">{ws.name}</div>
               <div className="text-sm text-gray-500">{ws.location}</div>
@@ -97,7 +141,7 @@ const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({ onSelect }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default WorkspaceSelector;
+export default WorkspaceSelector

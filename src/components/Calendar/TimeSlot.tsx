@@ -112,14 +112,14 @@ const TimeSlot: React.FC<TimeSlotProps> = ({
 			<div className="flex-grow grid grid-cols-3 gap-3 calendar-grid px-1">
 				{appointmentColumns.map((column, columnIndex) => (
 					<div
-						key={`column-${columnIndex}`}
-						className="relative p-1 cursor-pointer transition-all duration-200 hover:bg-blue-50 group border-b border-gray-200 "
+						key={`column-${columnIndex}-hour-${hour}`}
+						className="relative p-1 cursor-pointer …"
 						onClick={() => onSlotClick(hour)}
 					>
 						{column.length > 0 ? (
 							column.map(({ appointment, durationHours }) => (
 								<div
-									key={appointment.id}
+									key={`appt-${appointment.id}-col${columnIndex}-h${hour}`}
 									className={`relative ${durationHours > 1 ? 'multi-hour-appointment' : ''}`}
 									style={{
 										height: durationHours > 1 ? `${durationHours * 6}rem` : 'auto',
@@ -131,10 +131,13 @@ const TimeSlot: React.FC<TimeSlotProps> = ({
 										onClick={onAppointmentClick}
 										durationHours={durationHours}
 									/>
+
 								</div>
+
 							))
 						) : (
-							<div className="h-full w-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+							<div key={`empty-${columnIndex}-h${hour}`}
+								className="h-full w-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
 								<div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
 									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
 										<line x1="12" y1="5" x2="12" y2="19"></line>

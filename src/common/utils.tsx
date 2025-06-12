@@ -1,1 +1,1 @@
-export const base_path = 'localhost:3000'
+export const base_path = 'api.oyau.kz'

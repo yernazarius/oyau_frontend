@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { isAuthenticated } from './auth'
 
-const baseURL = 'http://localhost:9999'
+const baseURL = 'https://api.oyau.kz'
 
 const axiosInstance = axios.create({
 	baseURL,
